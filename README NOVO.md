@@ -10,3 +10,7 @@ Se tiver errado, peço que o senhor me avise imediatamente e eu mando um projeto
 
 Bem, de qualquer forma eu dei uma baita refatorada extra no projeto pra que ele fique certinho pros testes. Espero que goste <3
 
+
+
+Observação: estou usando junit 5
+
