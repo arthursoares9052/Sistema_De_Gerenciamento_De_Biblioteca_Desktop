@@ -1,20 +1,27 @@
-package biblioteca.view;
+package visao;
 
 import javax.swing.*;
 import java.awt.*;
+import servicos.LivroService;
 
 public class BibliotecaApp extends JFrame {
+
     private CardLayout cardLayout = new CardLayout();
     private JPanel mainPanel = new JPanel(cardLayout);
 
-    private InserirLivroPanel inserirLivroPanel = new InserirLivroPanel();
-    private ListarLivrosPanel listarLivrosPanel = new ListarLivrosPanel();
+    private final LivroService service = new LivroService();
+
+    private final InserirLivroPanel inserirLivroPanel;
+    private ListarLivrosPanel listarLivrosPanel;
 
     public BibliotecaApp() {
-        setTitle("Biblioteca - Etapa 3");
+        setTitle("Biblioteca");
         setSize(700, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        inserirLivroPanel = new InserirLivroPanel(service);
+        listarLivrosPanel = new ListarLivrosPanel(service);
 
         mainPanel.add(inserirLivroPanel, "inserir");
         mainPanel.add(listarLivrosPanel, "listar");

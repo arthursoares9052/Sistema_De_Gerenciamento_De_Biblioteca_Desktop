@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS biblioteca;
+CREATE DATABASE biblioteca;
 USE biblioteca;
 
 CREATE TABLE livros (
@@ -6,6 +6,6 @@ CREATE TABLE livros (
   titulo VARCHAR(255) NOT NULL,
   autor VARCHAR(255) NOT NULL,
   genero VARCHAR(100),
-  data_publicacao DATE,
+  data_publicacao VARCHAR(10),
   pdf LONGBLOB NOT NULL
 );

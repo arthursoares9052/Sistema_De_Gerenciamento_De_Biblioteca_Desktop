@@ -1,27 +1,47 @@
-package biblioteca.view;
+package visao;
 
-import biblioteca.model.Livro;
-import biblioteca.model.LivroDAO;
+import modelo.Livro;
+import servicos.LivroService;
+
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class InserirLivroPanel extends JPanel {
+
     private JTextField tituloField = new JTextField(30);
     private JTextField autorField = new JTextField(30);
     private JTextField generoField = new JTextField(15);
-    private JTextField dataField = new JTextField(10);
+
+    private JFormattedTextField dataField;
     private JTextField caminhoPdfField = new JTextField(30);
+
     private JButton btnEscolherPdf = new JButton("Escolher PDF");
     private JButton btnInserir = new JButton("Inserir Livro");
     private JButton btnIrParaLista = new JButton("Ver Livros");
 
-    private byte[] pdfBytes = null;
+    private byte[] pdfBytes;
     private Runnable onSucesso;
 
-    public InserirLivroPanel() {
+    private LivroService service;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    public InserirLivroPanel(LivroService service) {
+        this.service = service;
+
         setLayout(new BorderLayout());
+
+        try {
+            MaskFormatter mask = new MaskFormatter("##/##/####");
+            mask.setPlaceholderCharacter('_');
+            dataField = new JFormattedTextField(mask);
+            dataField.setColumns(10);
+        } catch (Exception e) {
+            dataField = new JFormattedTextField();
+        }
 
         JPanel form = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -37,10 +57,10 @@ public class InserirLivroPanel extends JPanel {
         c.gridx = 0; c.gridy = 2; form.add(new JLabel("Gênero:"), c);
         c.gridx = 1; form.add(generoField, c);
 
-        c.gridx = 0; c.gridy = 3; form.add(new JLabel("Data de publicação:"), c);
+        c.gridx = 0; c.gridy = 3; form.add(new JLabel("Data:"), c);
         c.gridx = 1; form.add(dataField, c);
 
-        c.gridx = 0; c.gridy = 4; form.add(new JLabel("Arquivo PDF:"), c);
+        c.gridx = 0; c.gridy = 4; form.add(new JLabel("PDF:"), c);
         c.gridx = 1; form.add(caminhoPdfField, c);
         c.gridx = 2; form.add(btnEscolherPdf, c);
 
@@ -55,47 +75,45 @@ public class InserirLivroPanel extends JPanel {
 
         btnEscolherPdf.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
-            int res = chooser.showOpenDialog(this);
-            if (res == JFileChooser.APPROVE_OPTION) {
+            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 try {
-                    pdfBytes = java.nio.file.Files.readAllBytes(chooser.getSelectedFile().toPath());
+                    pdfBytes = Files.readAllBytes(chooser.getSelectedFile().toPath());
                     caminhoPdfField.setText(chooser.getSelectedFile().getAbsolutePath());
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Erro ao carregar PDF: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(this, ex.getMessage());
                 }
             }
         });
 
         btnInserir.addActionListener(e -> {
             try {
-                String titulo = tituloField.getText().trim();
-                String autor = autorField.getText().trim();
-                String genero = generoField.getText().trim();
-                String data = dataField.getText().trim();
-
-                if(titulo.isEmpty() || autor.isEmpty() || genero.isEmpty() || data.isEmpty() || pdfBytes == null) {
-                    JOptionPane.showMessageDialog(this, "Preencha todos os campos e escolha um PDF.");
+                if (pdfBytes == null) {
+                    JOptionPane.showMessageDialog(this, "Selecione um PDF.");
                     return;
                 }
 
-                Livro livro = new Livro(titulo, autor, genero, data, pdfBytes);
-                LivroDAO dao = new LivroDAO();
+                LocalDate data = LocalDate.parse(dataField.getText(), formatter);
 
-                if(!dao.existeLivro(livro)) {
-                    dao.inserirLivro(livro);
-                    JOptionPane.showMessageDialog(this, "Livro inserido com sucesso.");
-                    limparCampos();
-                    if(onSucesso != null) onSucesso.run();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Livro já existe.");
-                }
-            } catch(Exception ex) {
-                JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage());
+                Livro livro = new Livro(
+                    tituloField.getText().trim(),
+                    autorField.getText().trim(),
+                    generoField.getText().trim(),
+                    data,
+                    pdfBytes
+                );
+
+                service.inserir(livro);
+                limpar();
+
+                if (onSucesso != null) onSucesso.run();
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Data inválida.");
             }
         });
 
         btnIrParaLista.addActionListener(e -> {
-            if(onSucesso != null) onSucesso.run();
+            if (onSucesso != null) onSucesso.run();
         });
     }
 
@@ -103,11 +121,11 @@ public class InserirLivroPanel extends JPanel {
         onSucesso = r;
     }
 
-    private void limparCampos() {
+    private void limpar() {
         tituloField.setText("");
         autorField.setText("");
         generoField.setText("");
-        dataField.setText("");
+        dataField.setValue(null);
         caminhoPdfField.setText("");
         pdfBytes = null;
     }
