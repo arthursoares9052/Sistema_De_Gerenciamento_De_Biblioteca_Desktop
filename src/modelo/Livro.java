@@ -12,6 +12,9 @@ public class Livro {
     private byte[] pdf;
 
     public Livro(String titulo, String autor, String genero, LocalDate dataPublicacao, byte[] pdf) {
+        if (titulo == null || titulo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Título não pode ser vazio");
+        }
         this.titulo = titulo;
         this.autor = autor;
         this.genero = genero;

@@ -1,60 +1,33 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package utils;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
 
-/**
- *
- * @author hjhar
- */
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
+
+import static org.junit.Assert.*;
+
 public class DataUtilsTest {
-    
-    public DataUtilsTest() {
+
+    private DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern("dd/MM/uuuu")
+                             .withResolverStyle(ResolverStyle.STRICT);
+
+    @Test
+    public void testParseDataValida() {
+        String dataStr = "23/12/2023";
+        LocalDate data = LocalDate.parse(dataStr, formatter);
+
+        assertEquals(23, data.getDayOfMonth());
+        assertEquals(12, data.getMonthValue());
+        assertEquals(2023, data.getYear());
     }
 
-    @org.junit.jupiter.api.BeforeAll
-    public static void setUpClass() throws Exception {
+    @Test(expected = DateTimeParseException.class)
+    public void testParseDataInvalida() {
+        String dataStr = "31/02/2023";
+        LocalDate.parse(dataStr, formatter);
     }
-
-    @org.junit.jupiter.api.AfterAll
-    public static void tearDownClass() throws Exception {
-    }
-
-    @org.junit.jupiter.api.BeforeEach
-    public void setUp() throws Exception {
-    }
-
-    @org.junit.jupiter.api.AfterEach
-    public void tearDown() throws Exception {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
-    @BeforeEach
-    public void setUp() {
-    }
-    
-    @AfterEach
-    public void tearDown() {
-    }
-
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
-    // @Test
-    // public void hello() {}
 }
